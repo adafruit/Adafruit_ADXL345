@@ -69,11 +69,18 @@
 class Adafruit_ADXL345{
  public:
   Adafruit_ADXL345();
+  Adafruit_ADXL345(uint8_t clk, uint8_t miso, uint8_t mosi, uint8_t cs);
   void begin(void);
   uint8_t getDeviceID(void);
   int16_t getX(void);
   int16_t getY(void);
   int16_t getZ(void);
 
+  uint8_t readRegister(uint8_t reg);
+  void writeRegister(uint8_t reg, uint8_t value);
+  int16_t read16(uint8_t reg);
+
  private:
+  boolean _i2c;
+  uint8_t _clk, _do, _di, _cs;
 };
