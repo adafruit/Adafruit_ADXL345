@@ -8,15 +8,15 @@
     of measuring up to +/-16g.  This driver communicate using I2C.
 
     This is a library for the Adafruit ADXL345 breakout
-    ----> https://www.adafruit.com/products/???
+    ----> https://www.adafruit.com/products/1231
 
     Adafruit invests time and resources providing this open source code,
     please support Adafruit and open-source hardware by purchasing
     products from Adafruit!
 
     @section  HISTORY
-
-	  v1.1 - Added Adafruit_Sensor library support
+    
+    v1.1 - Added Adafruit_Sensor library support
     v1.0 - First release
 */
 /**************************************************************************/
