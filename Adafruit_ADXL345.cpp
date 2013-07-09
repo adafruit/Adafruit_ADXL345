@@ -92,7 +92,7 @@ static int16_t read16(uint8_t reg) {
   i2cwrite(reg);
   Wire.endTransmission();
   Wire.requestFrom(ADXL345_ADDRESS, 2);
-  return (uint16_t)(i2cread() | (i2cread() << 8));  
+  return (int16_t)(i2cread() | (i2cread() << 8));  
 }
 
 /**************************************************************************/
@@ -160,7 +160,7 @@ bool Adafruit_ADXL345::begin() {
   
   // Enable measurements
   writeRegister(ADXL345_REG_POWER_CTL, 0x08);  
-  
+    
   return true;
 }
 
@@ -177,7 +177,10 @@ void Adafruit_ADXL345::setRange(range_t range)
   /* Update the data rate */
   format &= ~0x0F;
   format |= range;
-
+  
+  /* Make sure that the FULL-RES bit is enabled for range scaling */
+  format |= 0x08;
+  
   /* Write the register back to the IC */
   writeRegister(ADXL345_REG_DATA_FORMAT, format);
 }
@@ -223,14 +226,14 @@ dataRate_t Adafruit_ADXL345::getDataRate(void)
 void Adafruit_ADXL345::getEvent(sensors_event_t *event) {
   /* Clear the event */
   memset(event, 0, sizeof(sensors_event_t));
-
+  
   event->version   = sizeof(sensors_event_t);
   event->sensor_id = _sensorID;
   event->type      = SENSOR_TYPE_ACCELEROMETER;
   event->timestamp = 0;
-  event->acceleration.x = getX() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
-  event->acceleration.y = getY() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
-  event->acceleration.z = getZ() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
+  event->acceleration.x = x * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
+  event->acceleration.y = y * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
+  event->acceleration.z = z * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
 }
 
 /**************************************************************************/
