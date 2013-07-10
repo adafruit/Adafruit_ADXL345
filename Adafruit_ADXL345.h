@@ -117,4 +117,5 @@ class Adafruit_ADXL345 : public Adafruit_Sensor {
 
  private:
   int32_t _sensorID;
+  range_t _range;
 };

@@ -119,6 +119,12 @@ void setup(void)
     Serial.println("Ooops, no ADXL345 detected ... Check your wiring!");
     while(1);
   }
+
+  /* Set the range to whatever is appropriate for your project */
+  accel.setRange(ADXL345_RANGE_16_G);
+  // displaySetRange(ADXL345_RANGE_8_G);
+  // displaySetRange(ADXL345_RANGE_4_G);
+  // displaySetRange(ADXL345_RANGE_2_G);
   
   /* Display some basic information on this sensor */
   displaySensorDetails();
