@@ -3,7 +3,7 @@
 #include <Adafruit_ADXL345.h>
 
 /* Assign a unique ID to this sensor at the same time */
-Adafruit_ADXL345 accel = Adafruit_ADXL345(12345);
+Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
 
 void displaySensorDetails(void)
 {

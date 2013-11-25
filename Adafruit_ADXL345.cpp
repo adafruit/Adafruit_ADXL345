@@ -137,7 +137,7 @@ static int16_t getZ(void) {
     @brief  Instantiates a new ADXL345 class
 */
 /**************************************************************************/
-Adafruit_ADXL345::Adafruit_ADXL345(int32_t sensorID) {
+Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(int32_t sensorID) {
   _sensorID = sensorID;
   _range = ADXL345_RANGE_2_G;
 }
@@ -147,7 +147,7 @@ Adafruit_ADXL345::Adafruit_ADXL345(int32_t sensorID) {
     @brief  Setups the HW (reads coefficients values, etc.)
 */
 /**************************************************************************/
-bool Adafruit_ADXL345::begin() {
+bool Adafruit_ADXL345_Unified::begin() {
   Wire.begin();
 
   /* Check connection */
@@ -170,7 +170,7 @@ bool Adafruit_ADXL345::begin() {
     @brief  Sets the g range for the accelerometer
 */
 /**************************************************************************/
-void Adafruit_ADXL345::setRange(range_t range)
+void Adafruit_ADXL345_Unified::setRange(range_t range)
 {
   /* Red the data format register to preserve bits */
   uint8_t format = readRegister(ADXL345_REG_DATA_FORMAT);
@@ -194,7 +194,7 @@ void Adafruit_ADXL345::setRange(range_t range)
     @brief  Sets the g range for the accelerometer
 */
 /**************************************************************************/
-range_t Adafruit_ADXL345::getRange(void)
+range_t Adafruit_ADXL345_Unified::getRange(void)
 {
   /* Red the data format register to preserve bits */
   return (range_t)(readRegister(ADXL345_REG_DATA_FORMAT) & 0x03);
@@ -205,7 +205,7 @@ range_t Adafruit_ADXL345::getRange(void)
     @brief  Sets the data rate for the ADXL345 (controls power consumption)
 */
 /**************************************************************************/
-void Adafruit_ADXL345::setDataRate(dataRate_t dataRate)
+void Adafruit_ADXL345_Unified::setDataRate(dataRate_t dataRate)
 {
   /* Note: The LOW_POWER bits are currently ignored and we always keep
      the device in 'normal' mode */
@@ -217,7 +217,7 @@ void Adafruit_ADXL345::setDataRate(dataRate_t dataRate)
     @brief  Sets the data rate for the ADXL345 (controls power consumption)
 */
 /**************************************************************************/
-dataRate_t Adafruit_ADXL345::getDataRate(void)
+dataRate_t Adafruit_ADXL345_Unified::getDataRate(void)
 {
   return (dataRate_t)(readRegister(ADXL345_REG_BW_RATE) & 0x0F);
 }
@@ -227,7 +227,7 @@ dataRate_t Adafruit_ADXL345::getDataRate(void)
     @brief  Gets the most recent sensor event
 */
 /**************************************************************************/
-void Adafruit_ADXL345::getEvent(sensors_event_t *event) {
+void Adafruit_ADXL345_Unified::getEvent(sensors_event_t *event) {
   /* Clear the event */
   memset(event, 0, sizeof(sensors_event_t));
   
@@ -245,7 +245,7 @@ void Adafruit_ADXL345::getEvent(sensors_event_t *event) {
     @brief  Gets the sensor_t data
 */
 /**************************************************************************/
-void Adafruit_ADXL345::getSensor(sensor_t *sensor) {
+void Adafruit_ADXL345_Unified::getSensor(sensor_t *sensor) {
   /* Clear the sensor_t object */
   memset(sensor, 0, sizeof(sensor_t));
 

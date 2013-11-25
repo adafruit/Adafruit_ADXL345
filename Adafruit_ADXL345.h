@@ -103,9 +103,9 @@ typedef enum
   ADXL345_RANGE_2_G           = 0b00    // +/- 2g (default value)
 } range_t;
 
-class Adafruit_ADXL345 : public Adafruit_Sensor {
+class Adafruit_ADXL345_Unified : public Adafruit_Sensor {
  public:
-  Adafruit_ADXL345(int32_t sensorID = -1);
+  Adafruit_ADXL345_Unified(int32_t sensorID = -1);
   
   bool       begin(void);
   void       setRange(range_t range);
