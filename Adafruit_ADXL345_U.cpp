@@ -29,7 +29,7 @@
 #include <Wire.h>
 #include <limits.h>
 
-#include "Adafruit_ADXL345.h"
+#include "Adafruit_ADXL345_U.h"
 
 /**************************************************************************/
 /*!
