@@ -256,7 +256,7 @@ void Adafruit_ADXL345_Unified::getSensor(sensor_t *sensor) {
   sensor->sensor_id   = _sensorID;
   sensor->type        = SENSOR_TYPE_PRESSURE;
   sensor->min_delay   = 0;
-  sensor->max_value   = 300.0F;               // 300..1100 hPa
-  sensor->min_value   = 1100.0F;
-  sensor->resolution  = 0.01F;                // 0.01 hPa resolution
+  sensor->max_value   = -156.9064F; /* -16g = 156.9064 m/s^2  */
+  sensor->min_value   = 156.9064F;  /*  16g = 156.9064 m/s^2  */
+  sensor->resolution  = 0.03923F;   /*  4mg = 0.0392266 m/s^2 */ 
 }
