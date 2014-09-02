@@ -106,7 +106,8 @@ typedef enum
 class Adafruit_ADXL345_Unified : public Adafruit_Sensor {
  public:
   Adafruit_ADXL345_Unified(int32_t sensorID = -1);
-  
+  Adafruit_ADXL345_Unified(uint8_t clock, uint8_t miso, uint8_t mosi, uint8_t cs, int32_t sensorID = -1);
+
   bool       begin(void);
   void       setRange(range_t range);
   range_t    getRange(void);
@@ -115,7 +116,19 @@ class Adafruit_ADXL345_Unified : public Adafruit_Sensor {
   void       getEvent(sensors_event_t*);
   void       getSensor(sensor_t*);
 
+  uint8_t    getDeviceID(void);
+  void       writeRegister(uint8_t reg, uint8_t value);
+  uint8_t    readRegister(uint8_t reg);
+  int16_t    read16(uint8_t reg);
+
+  int16_t    getX(void), getY(void), getZ(void);
  private:
+
+  inline uint8_t  i2cread(void);
+  inline void     i2cwrite(uint8_t x);
+
   int32_t _sensorID;
   range_t _range;
+  uint8_t _clk, _do, _di, _cs;
+  bool    _i2c;
 };

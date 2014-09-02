@@ -36,7 +36,7 @@
     @brief  Abstract away platform differences in Arduino wire library
 */
 /**************************************************************************/
-static uint8_t i2cread(void) {
+inline uint8_t Adafruit_ADXL345_Unified::i2cread(void) {
   #if ARDUINO >= 100
   return Wire.read();
   #else
@@ -49,7 +49,7 @@ static uint8_t i2cread(void) {
     @brief  Abstract away platform differences in Arduino wire library
 */
 /**************************************************************************/
-static void i2cwrite(uint8_t x) {
+inline void Adafruit_ADXL345_Unified::i2cwrite(uint8_t x) {
   #if ARDUINO >= 100
   Wire.write((uint8_t)x);
   #else
@@ -59,14 +59,39 @@ static void i2cwrite(uint8_t x) {
 
 /**************************************************************************/
 /*!
+    @brief  Abstract away SPI receiver & transmitter
+*/
+/**************************************************************************/
+static uint8_t spixfer(uint8_t clock, uint8_t miso, uint8_t mosi, uint8_t data) {
+  uint8_t reply = 0;
+  for (int i=7; i>=0; i--) {
+    reply <<= 1;
+    digitalWrite(clock, LOW);
+    digitalWrite(mosi, data & (1<<i));
+    digitalWrite(clock, HIGH);
+    if (digitalRead(miso)) 
+      reply |= 1;
+  }
+  return reply;
+}
+
+/**************************************************************************/
+/*!
     @brief  Writes 8-bits to the specified destination register
 */
 /**************************************************************************/
-static void writeRegister(uint8_t reg, uint8_t value) {
-  Wire.beginTransmission(ADXL345_ADDRESS);
-  i2cwrite((uint8_t)reg);
-  i2cwrite((uint8_t)(value));
-  Wire.endTransmission();
+void Adafruit_ADXL345_Unified::writeRegister(uint8_t reg, uint8_t value) {
+  if (_i2c) {
+    Wire.beginTransmission(ADXL345_ADDRESS);
+    i2cwrite((uint8_t)reg);
+    i2cwrite((uint8_t)(value));
+    Wire.endTransmission();
+  } else {
+    digitalWrite(_cs, LOW);
+    spixfer(_clk, _di, _do, reg);
+    spixfer(_clk, _di, _do, value);
+    digitalWrite(_cs, HIGH);
+  }
 }
 
 /**************************************************************************/
@@ -74,12 +99,21 @@ static void writeRegister(uint8_t reg, uint8_t value) {
     @brief  Reads 8-bits from the specified register
 */
 /**************************************************************************/
-static uint8_t readRegister(uint8_t reg) {
-  Wire.beginTransmission(ADXL345_ADDRESS);
-  i2cwrite(reg);
-  Wire.endTransmission();
-  Wire.requestFrom(ADXL345_ADDRESS, 1);
-  return (i2cread());  
+uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
+  if (_i2c) {
+    Wire.beginTransmission(ADXL345_ADDRESS);
+    i2cwrite(reg);
+    Wire.endTransmission();
+    Wire.requestFrom(ADXL345_ADDRESS, 1);
+    return (i2cread());
+  } else {
+    reg |= 0x80; // read byte
+    digitalWrite(_cs, LOW);
+    spixfer(_clk, _di, _do, reg);
+    uint8_t reply = spixfer(_clk, _di, _do, 0xFF);
+    digitalWrite(_cs, HIGH);
+    return reply;
+  }  
 }
 
 /**************************************************************************/
@@ -87,12 +121,21 @@ static uint8_t readRegister(uint8_t reg) {
     @brief  Reads 16-bits from the specified register
 */
 /**************************************************************************/
-static int16_t read16(uint8_t reg) {
-  Wire.beginTransmission(ADXL345_ADDRESS);
-  i2cwrite(reg);
-  Wire.endTransmission();
-  Wire.requestFrom(ADXL345_ADDRESS, 2);
-  return (int16_t)(i2cread() | (i2cread() << 8));  
+int16_t Adafruit_ADXL345_Unified::read16(uint8_t reg) {
+  if (_i2c) {
+    Wire.beginTransmission(ADXL345_ADDRESS);
+    i2cwrite(reg);
+    Wire.endTransmission();
+    Wire.requestFrom(ADXL345_ADDRESS, 2);
+    return (uint16_t)(i2cread() | (i2cread() << 8));  
+  } else {
+    reg |= 0x80 | 0x40; // read byte | multibyte
+    digitalWrite(_cs, LOW);
+    spixfer(_clk, _di, _do, reg);
+    uint16_t reply = spixfer(_clk, _di, _do, 0xFF)  | (spixfer(_clk, _di, _do, 0xFF) << 8);
+    digitalWrite(_cs, HIGH);
+    return reply;
+  }    
 }
 
 /**************************************************************************/
@@ -100,7 +143,7 @@ static int16_t read16(uint8_t reg) {
     @brief  Read the device ID (can be used to check connection)
 */
 /**************************************************************************/
-static uint8_t getDeviceID(void) {
+uint8_t Adafruit_ADXL345_Unified::getDeviceID(void) {
   // Check device ID register
   return readRegister(ADXL345_REG_DEVID);
 }
@@ -110,7 +153,7 @@ static uint8_t getDeviceID(void) {
     @brief  Gets the most recent X axis value
 */
 /**************************************************************************/
-static int16_t getX(void) {
+int16_t Adafruit_ADXL345_Unified::getX(void) {
   return read16(ADXL345_REG_DATAX0);
 }
 
@@ -119,7 +162,7 @@ static int16_t getX(void) {
     @brief  Gets the most recent Y axis value
 */
 /**************************************************************************/
-static int16_t getY(void) {
+int16_t Adafruit_ADXL345_Unified::getY(void) {
   return read16(ADXL345_REG_DATAY0);
 }
 
@@ -128,7 +171,7 @@ static int16_t getY(void) {
     @brief  Gets the most recent Z axis value
 */
 /**************************************************************************/
-static int16_t getZ(void) {
+int16_t Adafruit_ADXL345_Unified::getZ(void) {
   return read16(ADXL345_REG_DATAZ0);
 }
 
@@ -140,6 +183,22 @@ static int16_t getZ(void) {
 Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(int32_t sensorID) {
   _sensorID = sensorID;
   _range = ADXL345_RANGE_2_G;
+  _i2c = true;
+}
+
+/**************************************************************************/
+/*!
+    @brief  Instantiates a new ADXL345 class in SPI mode
+*/
+/**************************************************************************/
+Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(uint8_t clock, uint8_t miso, uint8_t mosi, uint8_t cs, int32_t sensorID) {
+  _sensorID = sensorID;
+  _range = ADXL345_RANGE_2_G;
+  _cs = cs;
+  _clk = clock;
+  _do = mosi;
+  _di = miso;
+  _i2c = false;
 }
 
 /**************************************************************************/
@@ -148,7 +207,16 @@ Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(int32_t sensorID) {
 */
 /**************************************************************************/
 bool Adafruit_ADXL345_Unified::begin() {
-  Wire.begin();
+  
+  if (_i2c)
+    Wire.begin();
+  else {
+    pinMode(_cs, OUTPUT);
+    pinMode(_clk, OUTPUT);
+    digitalWrite(_clk, HIGH);
+    pinMode(_do, OUTPUT);
+    pinMode(_di, INPUT);
+  }
 
   /* Check connection */
   uint8_t deviceid = getDeviceID();
