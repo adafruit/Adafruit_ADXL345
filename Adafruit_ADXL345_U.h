@@ -113,7 +113,7 @@ class Adafruit_ADXL345_Unified : public Adafruit_Sensor {
   range_t    getRange(void);
   void       setDataRate(dataRate_t dataRate);
   dataRate_t getDataRate(void);
-  void       getEvent(sensors_event_t*);
+  bool       getEvent(sensors_event_t*);
   void       getSensor(sensor_t*);
 
   uint8_t    getDeviceID(void);

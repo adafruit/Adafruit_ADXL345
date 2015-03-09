@@ -295,7 +295,7 @@ dataRate_t Adafruit_ADXL345_Unified::getDataRate(void)
     @brief  Gets the most recent sensor event
 */
 /**************************************************************************/
-void Adafruit_ADXL345_Unified::getEvent(sensors_event_t *event) {
+bool Adafruit_ADXL345_Unified::getEvent(sensors_event_t *event) {
   /* Clear the event */
   memset(event, 0, sizeof(sensors_event_t));
   
@@ -306,6 +306,8 @@ void Adafruit_ADXL345_Unified::getEvent(sensors_event_t *event) {
   event->acceleration.x = getX() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
   event->acceleration.y = getY() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
   event->acceleration.z = getZ() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
+  
+  return true;
 }
 
 /**************************************************************************/
