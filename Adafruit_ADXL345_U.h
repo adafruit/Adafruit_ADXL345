@@ -1,11 +1,14 @@
 /**************************************************************************/
 /*!
-    @file     Adafruit_ADS1015.h
-    @author   K. Townsend (Adafruit Industries)
+    @file     Adafruit_ADXL345.cpp
+    @author   K.Townsend (Adafruit Industries)
     @license  BSD (see license.txt)
 
-    This is a library for the Adafruit ADS1015 breakout board
-    ----> https://www.adafruit.com/products/???
+    The ADXL345 is a digital accelerometer with 13-bit resolution, capable
+    of measuring up to +/-16g.  This driver communicate using I2C.
+
+    This is a library for the Adafruit ADXL345 breakout
+    ----> https://www.adafruit.com/products/1231
 
     Adafruit invests time and resources providing this open source code,
     please support Adafruit and open-source hardware by purchasing
@@ -13,7 +16,8 @@
 
     @section  HISTORY
 
-    v1.0  - First release
+    v1.1 - Added Adafruit_Sensor library support
+    v1.0 - First release
 */
 /**************************************************************************/
 
@@ -76,22 +80,22 @@
 /* Used with register 0x2C (ADXL345_REG_BW_RATE) to set bandwidth */
 typedef enum
 {
-  ADXL345_DATARATE_3200_HZ    = 0b1111, // 1600Hz Bandwidth   140µA IDD
-  ADXL345_DATARATE_1600_HZ    = 0b1110, //  800Hz Bandwidth    90µA IDD
-  ADXL345_DATARATE_800_HZ     = 0b1101, //  400Hz Bandwidth   140µA IDD
-  ADXL345_DATARATE_400_HZ     = 0b1100, //  200Hz Bandwidth   140µA IDD
-  ADXL345_DATARATE_200_HZ     = 0b1011, //  100Hz Bandwidth   140µA IDD
-  ADXL345_DATARATE_100_HZ     = 0b1010, //   50Hz Bandwidth   140µA IDD
-  ADXL345_DATARATE_50_HZ      = 0b1001, //   25Hz Bandwidth    90µA IDD
-  ADXL345_DATARATE_25_HZ      = 0b1000, // 12.5Hz Bandwidth    60µA IDD
-  ADXL345_DATARATE_12_5_HZ    = 0b0111, // 6.25Hz Bandwidth    50µA IDD
-  ADXL345_DATARATE_6_25HZ     = 0b0110, // 3.13Hz Bandwidth    45µA IDD
-  ADXL345_DATARATE_3_13_HZ    = 0b0101, // 1.56Hz Bandwidth    40µA IDD
-  ADXL345_DATARATE_1_56_HZ    = 0b0100, // 0.78Hz Bandwidth    34µA IDD
-  ADXL345_DATARATE_0_78_HZ    = 0b0011, // 0.39Hz Bandwidth    23µA IDD
-  ADXL345_DATARATE_0_39_HZ    = 0b0010, // 0.20Hz Bandwidth    23µA IDD
-  ADXL345_DATARATE_0_20_HZ    = 0b0001, // 0.10Hz Bandwidth    23µA IDD
-  ADXL345_DATARATE_0_10_HZ    = 0b0000  // 0.05Hz Bandwidth    23µA IDD (default value)
+  ADXL345_DATARATE_3200_HZ    = 0b1111, // 1600Hz Bandwidth   140ÂµA IDD
+  ADXL345_DATARATE_1600_HZ    = 0b1110, //  800Hz Bandwidth    90ÂµA IDD
+  ADXL345_DATARATE_800_HZ     = 0b1101, //  400Hz Bandwidth   140ÂµA IDD
+  ADXL345_DATARATE_400_HZ     = 0b1100, //  200Hz Bandwidth   140ÂµA IDD
+  ADXL345_DATARATE_200_HZ     = 0b1011, //  100Hz Bandwidth   140ÂµA IDD
+  ADXL345_DATARATE_100_HZ     = 0b1010, //   50Hz Bandwidth   140ÂµA IDD
+  ADXL345_DATARATE_50_HZ      = 0b1001, //   25Hz Bandwidth    90ÂµA IDD
+  ADXL345_DATARATE_25_HZ      = 0b1000, // 12.5Hz Bandwidth    60ÂµA IDD
+  ADXL345_DATARATE_12_5_HZ    = 0b0111, // 6.25Hz Bandwidth    50ÂµA IDD
+  ADXL345_DATARATE_6_25HZ     = 0b0110, // 3.13Hz Bandwidth    45ÂµA IDD
+  ADXL345_DATARATE_3_13_HZ    = 0b0101, // 1.56Hz Bandwidth    40ÂµA IDD
+  ADXL345_DATARATE_1_56_HZ    = 0b0100, // 0.78Hz Bandwidth    34ÂµA IDD
+  ADXL345_DATARATE_0_78_HZ    = 0b0011, // 0.39Hz Bandwidth    23ÂµA IDD
+  ADXL345_DATARATE_0_39_HZ    = 0b0010, // 0.20Hz Bandwidth    23ÂµA IDD
+  ADXL345_DATARATE_0_20_HZ    = 0b0001, // 0.10Hz Bandwidth    23ÂµA IDD
+  ADXL345_DATARATE_0_10_HZ    = 0b0000  // 0.05Hz Bandwidth    23ÂµA IDD (default value)
 } dataRate_t;
 
 /* Used with register 0x31 (ADXL345_REG_DATA_FORMAT) to set g range */
