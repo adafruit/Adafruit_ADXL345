@@ -223,7 +223,6 @@ bool Adafruit_ADXL345_Unified::begin() {
   if (deviceid != 0xE5)
   {
     /* No ADXL345 detected ... return false */
-    Serial.println(deviceid, HEX);
     return false;
   }
   
