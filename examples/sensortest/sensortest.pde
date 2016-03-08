@@ -109,6 +109,9 @@ void displayRange(void)
 
 void setup(void) 
 {
+#ifndef ESP8266
+  while (!Serial); // for Leonardo/Micro/Zero
+#endif
   Serial.begin(9600);
   Serial.println("Accelerometer Test"); Serial.println("");
   
