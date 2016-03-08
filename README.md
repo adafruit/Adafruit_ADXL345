@@ -42,8 +42,8 @@ ESP8266            |      X       |             |            |
 Atmega2560 @ 16MHz |      X       |             |            | 
 ATSAM3X8E          |      X       |             |            | 
 ATSAM21D           |      X       |             |            | 
-ATtiny85 @ 16MHz   |             |             |     X       | 
-ATtiny85 @ 8MHz    |             |             |     X       | 
+ATtiny85 @ 16MHz   |             |      X       |            | sketch too big
+ATtiny85 @ 8MHz    |             |      X       |            | sketch too big
 Intel Curie @ 32MHz |      X       |             |            | 
 
   * ATmega328 @ 16MHz : Arduino UNO, Adafruit Pro Trinket 5V, Adafruit Metro 328, Adafruit Metro Mini
