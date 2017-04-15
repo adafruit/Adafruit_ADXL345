@@ -82,7 +82,7 @@ static uint8_t spixfer(uint8_t clock, uint8_t miso, uint8_t mosi, uint8_t data) 
 /**************************************************************************/
 void Adafruit_ADXL345_Unified::writeRegister(uint8_t reg, uint8_t value) {
   if (_i2c) {
-    Wire.beginTransmission(ADXL345_ADDRESS);
+    Wire.beginTransmission((uint8_t)_i2caddr);
     i2cwrite((uint8_t)reg);
     i2cwrite((uint8_t)(value));
     Wire.endTransmission();
@@ -101,10 +101,10 @@ void Adafruit_ADXL345_Unified::writeRegister(uint8_t reg, uint8_t value) {
 /**************************************************************************/
 uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
   if (_i2c) {
-    Wire.beginTransmission(ADXL345_ADDRESS);
+    Wire.beginTransmission((uint8_t)_i2caddr);
     i2cwrite(reg);
     Wire.endTransmission();
-    Wire.requestFrom(ADXL345_ADDRESS, 1);
+    Wire.requestFrom((uint8_t)_i2caddr, 1);
     return (i2cread());
   } else {
     reg |= 0x80; // read byte
@@ -123,10 +123,10 @@ uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
 /**************************************************************************/
 int16_t Adafruit_ADXL345_Unified::read16(uint8_t reg) {
   if (_i2c) {
-    Wire.beginTransmission(ADXL345_ADDRESS);
+    Wire.beginTransmission((uint8_t)_i2caddr);
     i2cwrite(reg);
     Wire.endTransmission();
-    Wire.requestFrom(ADXL345_ADDRESS, 2);
+    Wire.requestFrom((uint8_t)_i2caddr, 2);
     return (uint16_t)(i2cread() | (i2cread() << 8));  
   } else {
     reg |= 0x80 | 0x40; // read byte | multibyte
@@ -206,7 +206,8 @@ Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(uint8_t clock, uint8_t miso, 
     @brief  Setups the HW (reads coefficients values, etc.)
 */
 /**************************************************************************/
-bool Adafruit_ADXL345_Unified::begin() {
+bool Adafruit_ADXL345_Unified::begin(uint8_t i2caddr) {
+  _i2caddr = i2caddr;
   
   if (_i2c)
     Wire.begin();
