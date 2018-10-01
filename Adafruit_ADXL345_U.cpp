@@ -33,7 +33,7 @@
 
 /**************************************************************************/
 /*!
-    @brief  Abstract away platform differences in Arduino wire library
+    @brief  Abstract away platform differences in Arduino Wire library
 */
 /**************************************************************************/
 inline uint8_t Adafruit_ADXL345_Unified::i2cread(void) {
@@ -46,7 +46,7 @@ inline uint8_t Adafruit_ADXL345_Unified::i2cread(void) {
 
 /**************************************************************************/
 /*!
-    @brief  Abstract away platform differences in Arduino wire library
+    @brief  Abstract away platform differences in Arduino Wire library
 */
 /**************************************************************************/
 inline void Adafruit_ADXL345_Unified::i2cwrite(uint8_t x) {
@@ -140,7 +140,7 @@ int16_t Adafruit_ADXL345_Unified::read16(uint8_t reg) {
 
 /**************************************************************************/
 /*! 
-    @brief  Read the device ID (can be used to check connection)
+    @brief  Reads the device ID (can be used to check connection)
 */
 /**************************************************************************/
 uint8_t Adafruit_ADXL345_Unified::getDeviceID(void) {
@@ -240,7 +240,7 @@ bool Adafruit_ADXL345_Unified::begin() {
 /**************************************************************************/
 void Adafruit_ADXL345_Unified::setRange(range_t range)
 {
-  /* Red the data format register to preserve bits */
+  /* Read the data format register to preserve bits */
   uint8_t format = readRegister(ADXL345_REG_DATA_FORMAT);
 
   /* Update the data rate */
@@ -259,12 +259,12 @@ void Adafruit_ADXL345_Unified::setRange(range_t range)
 
 /**************************************************************************/
 /*!
-    @brief  Sets the g range for the accelerometer
+    @brief  Gets the g range for the accelerometer
 */
 /**************************************************************************/
 range_t Adafruit_ADXL345_Unified::getRange(void)
 {
-  /* Red the data format register to preserve bits */
+  /* Read the data format register to preserve bits */
   return (range_t)(readRegister(ADXL345_REG_DATA_FORMAT) & 0x03);
 }
 
@@ -282,7 +282,7 @@ void Adafruit_ADXL345_Unified::setDataRate(dataRate_t dataRate)
 
 /**************************************************************************/
 /*!
-    @brief  Sets the data rate for the ADXL345 (controls power consumption)
+    @brief  Gets the data rate for the ADXL345 (controls power consumption)
 */
 /**************************************************************************/
 dataRate_t Adafruit_ADXL345_Unified::getDataRate(void)

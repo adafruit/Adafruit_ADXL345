@@ -5,7 +5,7 @@
     @license  BSD (see license.txt)
 
     This is a library for the Adafruit ADS1015 breakout board
-    ----> https://www.adafruit.com/products/???
+    ----> https://www.adafruit.com/products/1231
 
     Adafruit invests time and resources providing this open source code,
     please support Adafruit and open-source hardware by purchasing
