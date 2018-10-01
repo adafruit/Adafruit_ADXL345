@@ -1,4 +1,4 @@
-#Adafruit ADXL345 Accelerometer Driver #
+# Adafruit ADXL345 Accelerometer Driver
 
 This driver is for the Adafruit ADXL345 Breakout (http://www.adafruit.com/products/1231), and is based on Adafruit's Unified Sensor Library (Adafruit_Sensor).
 
