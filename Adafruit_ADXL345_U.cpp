@@ -213,6 +213,7 @@ bool Adafruit_ADXL345_Unified::begin(uint8_t i2caddr) {
     Wire.begin();
   else {
     pinMode(_cs, OUTPUT);
+    digitalWrite(_cs, HIGH);
     pinMode(_clk, OUTPUT);
     digitalWrite(_clk, HIGH);
     pinMode(_do, OUTPUT);
