@@ -324,7 +324,7 @@ void Adafruit_ADXL345_Unified::getSensor(sensor_t *sensor) {
   sensor->name[sizeof(sensor->name)- 1] = 0;
   sensor->version     = 1;
   sensor->sensor_id   = _sensorID;
-  sensor->type        = SENSOR_TYPE_PRESSURE;
+  sensor->type        = SENSOR_TYPE_ACCELEROMETER;
   sensor->min_delay   = 0;
   sensor->max_value   = -156.9064F; /* -16g = 156.9064 m/s^2  */
   sensor->min_value   = 156.9064F;  /*  16g = 156.9064 m/s^2  */
