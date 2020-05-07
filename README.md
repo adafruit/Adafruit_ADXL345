@@ -1,4 +1,4 @@
-# Adafruit ADXL345 [![Build Status](https://github.com/adafruit/Adafruit_ADXL345/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit_ADXL345/actions)![Documentation](https://github.com/adafruit/ci-arduino/blob/master/assets/doxygen_badge.svg)](http://adafruit.github.io/Adafruit_ADXL345/html/index.html)
+# Adafruit ADXL345 [![Build Status](https://github.com/adafruit/Adafruit_ADXL345/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit_ADXL345/actions)[![Documentation](https://github.com/adafruit/ci-arduino/blob/master/assets/doxygen_badge.svg)](http://adafruit.github.io/Adafruit_ADXL345/html/index.html)
 # Adafruit ADXL345 Accelerometer Driver
 
 This driver is for the Adafruit ADXL345 Breakout (http://www.adafruit.com/products/1231), and is based on Adafruit's Unified Sensor Library (Adafruit_Sensor).
