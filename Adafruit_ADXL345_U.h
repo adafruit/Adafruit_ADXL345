@@ -33,8 +33,9 @@
 #include "WProgram.h"
 #endif
 
+#include <Adafruit_I2CDevice.h>
+#include <Adafruit_SPIDevice.h>
 #include <Adafruit_Sensor.h>
-#include <Wire.h>
 
 /*=========================================================================
     I2C ADDRESS/BITS
@@ -145,14 +146,11 @@ public:
   int16_t getX(void), getY(void), getZ(void);
 
 private:
-  inline uint8_t i2cread(void);
-  inline void i2cwrite(uint8_t x);
+  Adafruit_I2CDevice *i2c_dev = NULL; ///< Pointer to I2C bus interface
+  Adafruit_SPIDevice *spi_dev = NULL; ///< Pointer to SPI bus interface
 
   int32_t _sensorID;
   range_t _range;
-  uint8_t _clk, _do, _di, _cs;
-  bool _i2c;
-  int8_t _i2caddr;
 };
 
 #endif // Adafruit_ADXL345_h
