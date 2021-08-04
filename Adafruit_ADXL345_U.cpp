@@ -10,66 +10,9 @@
 #include "WProgram.h"
 #endif
 
-#include <Wire.h>
 #include <limits.h>
 
 #include "Adafruit_ADXL345_U.h"
-
-/**************************************************************************/
-/*!
-    @brief  And abstract 'send' method for different versions of the Arduino
-   Wire library
-    @returns The byte read
-*/
-/**************************************************************************/
-inline uint8_t Adafruit_ADXL345_Unified::i2cread(void) {
-#if ARDUINO >= 100
-  return Wire.read();
-#else
-  return Wire.receive();
-#endif
-}
-
-/**************************************************************************/
-/*!
-    @brief  And abstract 'send' method for different versions of the Arduino
-   Wire library
-    @param x The byte to send
-*/
-/**************************************************************************/
-inline void Adafruit_ADXL345_Unified::i2cwrite(uint8_t x) {
-#if ARDUINO >= 100
-  Wire.write((uint8_t)x);
-#else
-  Wire.send(x);
-#endif
-}
-
-/**************************************************************************/
-
-/**
- * @brief  Abstract away SPI receiver & transmitter
-
- * @param clock The pin number for SCK, the SPI ClocK line
- * @param miso The pin number for MISO, the SPI Master In Slave Out line
- * @param mosi The pin number for MOSI, the SPI Master Out Slave In line
- * @param data The byte to send
- *
- * @return uint8_t The single byte response
- */
-static uint8_t spixfer(uint8_t clock, uint8_t miso, uint8_t mosi,
-                       uint8_t data) {
-  uint8_t reply = 0;
-  for (int i = 7; i >= 0; i--) {
-    reply <<= 1;
-    digitalWrite(clock, LOW);
-    digitalWrite(mosi, data & (1 << i));
-    digitalWrite(clock, HIGH);
-    if (digitalRead(miso))
-      reply |= 1;
-  }
-  return reply;
-}
 
 /**************************************************************************/
 /*!
@@ -79,16 +22,11 @@ static uint8_t spixfer(uint8_t clock, uint8_t miso, uint8_t mosi,
 */
 /**************************************************************************/
 void Adafruit_ADXL345_Unified::writeRegister(uint8_t reg, uint8_t value) {
-  if (_i2c) {
-    Wire.beginTransmission((uint8_t)_i2caddr);
-    i2cwrite((uint8_t)reg);
-    i2cwrite((uint8_t)(value));
-    Wire.endTransmission();
+  uint8_t buffer[2] = {reg, value};
+  if (i2c_dev) {
+    i2c_dev->write(buffer, 2);
   } else {
-    digitalWrite(_cs, LOW);
-    spixfer(_clk, _di, _do, reg);
-    spixfer(_clk, _di, _do, value);
-    digitalWrite(_cs, HIGH);
+    spi_dev->write(buffer, 2);
   }
 }
 
@@ -100,20 +38,14 @@ void Adafruit_ADXL345_Unified::writeRegister(uint8_t reg, uint8_t value) {
 */
 /**************************************************************************/
 uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
-  if (_i2c) {
-    Wire.beginTransmission((uint8_t)_i2caddr);
-    i2cwrite(reg);
-    Wire.endTransmission();
-    Wire.requestFrom((uint8_t)_i2caddr, 1);
-    return (i2cread());
+  uint8_t buffer[1] = {i2c_dev ? reg : reg | 0x80};
+  if (i2c_dev) {
+    i2c_dev->write(buffer, 1);
+    i2c_dev->read(buffer, 1);
   } else {
-    reg |= 0x80; // read byte
-    digitalWrite(_cs, LOW);
-    spixfer(_clk, _di, _do, reg);
-    uint8_t reply = spixfer(_clk, _di, _do, 0xFF);
-    digitalWrite(_cs, HIGH);
-    return reply;
+    spi_dev->write_then_read(buffer, 1, buffer, 1);
   }
+  return buffer[0];
 }
 
 /**************************************************************************/
@@ -124,21 +56,14 @@ uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
 */
 /**************************************************************************/
 int16_t Adafruit_ADXL345_Unified::read16(uint8_t reg) {
-  if (_i2c) {
-    Wire.beginTransmission((uint8_t)_i2caddr);
-    i2cwrite(reg);
-    Wire.endTransmission();
-    Wire.requestFrom((uint8_t)_i2caddr, 2);
-    return (uint16_t)(i2cread() | (i2cread() << 8));
+  uint8_t buffer[2] = {i2c_dev ? reg : reg | 0x80 | 0x40, 0};
+  if (i2c_dev) {
+    i2c_dev->write(buffer, 1);
+    i2c_dev->read(buffer, 2);
   } else {
-    reg |= 0x80 | 0x40; // read byte | multibyte
-    digitalWrite(_cs, LOW);
-    spixfer(_clk, _di, _do, reg);
-    uint16_t reply =
-        spixfer(_clk, _di, _do, 0xFF) | (spixfer(_clk, _di, _do, 0xFF) << 8);
-    digitalWrite(_cs, HIGH);
-    return reply;
+    spi_dev->write_then_read(buffer, 1, buffer, 2);
   }
+  return uint16_t(buffer[1]) << 8 | uint16_t(buffer[0]);
 }
 
 /**************************************************************************/
@@ -191,7 +116,6 @@ int16_t Adafruit_ADXL345_Unified::getZ(void) {
 Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(int32_t sensorID) {
   _sensorID = sensorID;
   _range = ADXL345_RANGE_2_G;
-  _i2c = true;
 }
 
 /**************************************************************************/
@@ -209,11 +133,8 @@ Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(uint8_t clock, uint8_t miso,
                                                    int32_t sensorID) {
   _sensorID = sensorID;
   _range = ADXL345_RANGE_2_G;
-  _cs = cs;
-  _clk = clock;
-  _do = mosi;
-  _di = miso;
-  _i2c = false;
+  spi_dev = new Adafruit_SPIDevice(cs, clock, miso, mosi, 1000000,
+                                   SPI_BITORDER_MSBFIRST, SPI_MODE1);
 }
 
 /**************************************************************************/
@@ -224,17 +145,13 @@ Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(uint8_t clock, uint8_t miso,
 */
 /**************************************************************************/
 bool Adafruit_ADXL345_Unified::begin(uint8_t i2caddr) {
-  _i2caddr = i2caddr;
-
-  if (_i2c)
-    Wire.begin();
-  else {
-    pinMode(_cs, OUTPUT);
-    digitalWrite(_cs, HIGH);
-    pinMode(_clk, OUTPUT);
-    digitalWrite(_clk, HIGH);
-    pinMode(_do, OUTPUT);
-    pinMode(_di, INPUT);
+  if (spi_dev == NULL) {
+    i2c_dev = new Adafruit_I2CDevice(i2caddr, &Wire);
+    if (!i2c_dev->begin())
+      return false;
+  } else {
+    if (!spi_dev->begin())
+      return false;
   }
 
   /* Check connection */
