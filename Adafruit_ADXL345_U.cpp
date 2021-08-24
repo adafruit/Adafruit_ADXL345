@@ -14,6 +14,13 @@
 
 #include "Adafruit_ADXL345_U.h"
 
+Adafruit_ADXL345_Unified::~Adafruit_ADXL345_Unified() {
+  if (i2c_dev)
+    delete i2c_dev;
+  if (spi_dev)
+    delete spi_dev;
+}
+
 /**************************************************************************/
 /*!
     @brief  Writes one byte to the specified destination register
@@ -146,6 +153,8 @@ Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(uint8_t clock, uint8_t miso,
 /**************************************************************************/
 bool Adafruit_ADXL345_Unified::begin(uint8_t i2caddr) {
   if (spi_dev == NULL) {
+    if (i2c_dev)
+      delete i2c_dev;
     i2c_dev = new Adafruit_I2CDevice(i2caddr, &Wire);
     if (!i2c_dev->begin())
       return false;
