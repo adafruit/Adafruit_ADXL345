@@ -45,7 +45,7 @@ void Adafruit_ADXL345_Unified::writeRegister(uint8_t reg, uint8_t value) {
 */
 /**************************************************************************/
 uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
-  uint8_t buffer[1] = {i2c_dev ? reg : reg | 0x80};
+  uint8_t buffer[1] = {i2c_dev ? reg : (uint8_t)(reg | 0x80)};
   if (i2c_dev) {
     i2c_dev->write(buffer, 1);
     i2c_dev->read(buffer, 1);
@@ -63,7 +63,7 @@ uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
 */
 /**************************************************************************/
 int16_t Adafruit_ADXL345_Unified::read16(uint8_t reg) {
-  uint8_t buffer[2] = {i2c_dev ? reg : reg | 0x80 | 0x40, 0};
+  uint8_t buffer[2] = {i2c_dev ? reg : (uint8_t)(reg | 0x80 | 0x40), 0};
   if (i2c_dev) {
     i2c_dev->write(buffer, 1);
     i2c_dev->read(buffer, 2);
