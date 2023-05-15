@@ -14,6 +14,11 @@
 
 #include "Adafruit_ADXL345_U.h"
 
+/* Constants for any min or max or static values*/
+const float MAX_G = 156.9064F;  /* 16g = 156.9064 m/s^2 */
+const float MIN_G = -156.9064F; /* -16g = -156.9064 m/s^2 */
+const float RESOLUTION = 0.03923F; /* 4mg = 0.0392266 m/s^2 */
+
 Adafruit_ADXL345_Unified::~Adafruit_ADXL345_Unified() {
   if (i2c_dev)
     delete i2c_dev;
@@ -30,12 +35,12 @@ Adafruit_ADXL345_Unified::~Adafruit_ADXL345_Unified() {
 /**************************************************************************/
 void Adafruit_ADXL345_Unified::writeRegister(uint8_t reg, uint8_t value) {
   uint8_t buffer[2] = {reg, value};
-  if (i2c_dev) {
-    i2c_dev->write(buffer, 2);
-  } else {
-    spi_dev->write(buffer, 2);
+  auto dev = i2c_dev ? static_cast<Adafruit_I2CDevice*>(i2c_dev) : static_cast<Adafruit_SPIDevice*>(spi_dev);
+  if (dev) {
+    dev->write(buffer, 2);
   }
 }
+
 
 /**************************************************************************/
 /*!
@@ -45,15 +50,19 @@ void Adafruit_ADXL345_Unified::writeRegister(uint8_t reg, uint8_t value) {
 */
 /**************************************************************************/
 uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
-  uint8_t buffer[1] = {i2c_dev ? reg : (uint8_t)(reg | 0x80)};
+  auto dev = i2c_dev ? static_cast<Adafruit_I2CDevice*>(i2c_dev) : static_cast<Adafruit_SPIDevice*>(spi_dev);
+  uint8_t buffer[1] = {i2c_dev ? reg : reg | 0x80};
+
   if (i2c_dev) {
-    i2c_dev->write(buffer, 1);
-    i2c_dev->read(buffer, 1);
+    dev->write(buffer, 1);
+    dev->read(buffer, 1);
   } else {
-    spi_dev->write_then_read(buffer, 1, buffer, 1);
+    dev->write_then_read(buffer, 1, buffer, 1);
   }
+
   return buffer[0];
 }
+
 
 /**************************************************************************/
 /*!
@@ -63,15 +72,19 @@ uint8_t Adafruit_ADXL345_Unified::readRegister(uint8_t reg) {
 */
 /**************************************************************************/
 int16_t Adafruit_ADXL345_Unified::read16(uint8_t reg) {
+  auto dev = i2c_dev ? static_cast<Adafruit_I2CDevice*>(i2c_dev) : static_cast<Adafruit_SPIDevice*>(spi_dev);
   uint8_t buffer[2] = {i2c_dev ? reg : (uint8_t)(reg | 0x80 | 0x40), 0};
+
   if (i2c_dev) {
-    i2c_dev->write(buffer, 1);
-    i2c_dev->read(buffer, 2);
+    dev->write(buffer, 1);
+    dev->read(buffer, 2);
   } else {
-    spi_dev->write_then_read(buffer, 1, buffer, 2);
+    dev->write_then_read(buffer, 1, buffer, 2);
   }
+
   return uint16_t(buffer[1]) << 8 | uint16_t(buffer[0]);
 }
+
 
 /**************************************************************************/
 /*!
@@ -149,19 +162,21 @@ Adafruit_ADXL345_Unified::Adafruit_ADXL345_Unified(uint8_t clock, uint8_t miso,
     @brief  Setups the HW (reads coefficients values, etc.)
     @param i2caddr The I2C address to begin communication with
     @return true: success false: a sensor with the correct ID was not found
+     - Suggested break away Begin Device rather than keeping a blob
 */
 /**************************************************************************/
+bool Adafruit_ADXL345_Unified::beginDevice(Adafruit_BusIO_Register *dev) {
+  if (dev)
+    delete dev;
+
+  dev = spi_dev ? new Adafruit_SPIDevice(SPI_CLOCK_DIV2) : new Adafruit_I2CDevice(i2caddr, &Wire);
+
+  return dev->begin();
+}
+
 bool Adafruit_ADXL345_Unified::begin(uint8_t i2caddr) {
-  if (spi_dev == NULL) {
-    if (i2c_dev)
-      delete i2c_dev;
-    i2c_dev = new Adafruit_I2CDevice(i2caddr, &Wire);
-    if (!i2c_dev->begin())
-      return false;
-  } else {
-    if (!spi_dev->begin())
-      return false;
-  }
+  if (!beginDevice(spi_dev ? spi_dev : i2c_dev))
+    return false;
 
   /* Check connection */
   uint8_t deviceid = getDeviceID();
@@ -175,6 +190,7 @@ bool Adafruit_ADXL345_Unified::begin(uint8_t i2caddr) {
 
   return true;
 }
+
 
 /**************************************************************************/
 /*!
@@ -248,15 +264,17 @@ bool Adafruit_ADXL345_Unified::getEvent(sensors_event_t *event) {
   event->sensor_id = _sensorID;
   event->type = SENSOR_TYPE_ACCELEROMETER;
   event->timestamp = 0;
-  event->acceleration.x =
-      getX() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
-  event->acceleration.y =
-      getY() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
-  event->acceleration.z =
-      getZ() * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
+  
+  // Reduce the number of repeated operations, making the code a bit more efficient.
+  float scaleFactor = ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD;
+
+  event->acceleration.x = getX() * scaleFactor;
+  event->acceleration.y = getY() * scaleFactor;
+  event->acceleration.z = getZ() * scaleFactor;
 
   return true;
 }
+
 
 /**************************************************************************/
 /*!
@@ -279,7 +297,7 @@ void Adafruit_ADXL345_Unified::getSensor(sensor_t *sensor) {
   sensor->sensor_id = _sensorID;
   sensor->type = SENSOR_TYPE_ACCELEROMETER;
   sensor->min_delay = 0;
-  sensor->max_value = -156.9064F; /* -16g = 156.9064 m/s^2  */
-  sensor->min_value = 156.9064F;  /*  16g = 156.9064 m/s^2  */
-  sensor->resolution = 0.03923F;  /*  4mg = 0.0392266 m/s^2 */
+  sensor->max_value = MIN_G;
+  sensor->min_value = MAX_G;
+  sensor->resolution = RESOLUTION;
 }
